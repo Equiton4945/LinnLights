@@ -16,22 +16,27 @@
         // runs when window opens.
         function init() {
             // obtain the button for 'setup L colours' and add the callback
-            var lbutton = document.getElementById("initLColours");
-            if (!lbutton) {
-                alert("no l button")
-            }
-            else {
-                lbutton.onclick = addStepColours;
-            }
+            //var lbutton = document.getElementById("initLColours");
+            //if (!lbutton) {
+            //    alert("no l button")
+            //}
+            //else {
+            //    lbutton.onclick = addStepColours;
+            //}
             
             // obtain the button for 'setup s colours' and add the callback
-            var sbutton = document.getElementById("initSColours");
-            if (!sbutton) {
-                alert("no s button");
-            }
-            else {
-                sbutton.onclick = addStepColours;
-            }
+            //var sbutton = document.getElementById("initSColours");
+            //if (!sbutton) {
+            //    alert("no s button");
+            //}
+            //else {
+            //    sbutton.onclick = addStepColours;
+            //}
+            
+            var lnumber = document.getElementById("lStepSize");
+            lnumber.onchange = addStepColours;
+            var snumber = document.getElementById("sStepSize");
+            snumber.onchange = addStepColours;
             
            // obtain the button to show the light pattern and add the callback
             var lightsButton  = document.getElementById("showLights");
@@ -49,10 +54,7 @@
             // get the button for generating the midi and add callback
             var showMidi = document.getElementById("showMidi");
             showMidi.onclick = generateMidi;
-            
-            // manually remove any colour dropdowns (there shouldn't be any but - just in case!)
-            removeColourSelectionList("lColours");
-            removeColourSelectionList("sColours");
+
             
             // programmatically press these two buttons (this creates the default colour set drop downs)
             addStepColoursForId("initLColours")
@@ -87,22 +89,23 @@
         
         // this callback adds the dropdowns for the relevant step. The target identifies which button was pressed.
         function addStepColours(e) {
-            var button = e.target.id;
-            addStepColoursForId(button);
+            var formItem = e.target.id;
+            addStepColoursForId(formItem);
         }
-            
+                
+        
         // This adds dropdowns under the l or s step size input text boxes
         // so if 3 is in the textbox, 3 dropdowns are created
-        function addStepColoursForId(button) {
+        function addStepColoursForId(formItem) {
             var textid = null;
             var nodeToAddTo = null;
             
-            if (button == "initLColours") {
+            if (formItem == "initLColours" || formItem == "lStepSize") {
                 textid = "lStepSize";
                 nodeToAddTo = "lColours";
             }
             
-            if (button == "initSColours") {
+            if (formItem == "initSColours" || formItem == "sStepSize") {
                 textid = "sStepSize";
                 nodeToAddTo = "sColours";
             }
@@ -565,8 +568,8 @@
             </p>
             <p>
                 <label for="lStepSize">Choose L step size:</label>
-                <input type="number" id="lStepSize" size="5" value="2">
-                <input type="button" id="initLColours" value="Setup L Colours">
+                <input type="number" id="lStepSize" size="5" value="2" min="2">
+                <!-- <input type="button" id="initLColours" value="Setup L Colours"> -->
                 <label for="firstColour">&nbsp;&nbsp;Choose colour of first scale note:</label>
                 <select id="firstColour">
                     <option value = "1" >Use first colour of first scale step</option>
@@ -587,8 +590,8 @@
             <div id="lColours"></div>
             <p>
                 <label for="sStepSize">Choose s step size:</label>
-                <input type="number" id="sStepSize" size="5" value="1">
-                <input type="button" id="initSColours" value="Setup s Colours"> 
+               <input type="number" id="sStepSize" size="5" value="1" min="1"> 
+               <!--  <input type="button" id="initSColours" value="Setup s Colours"> -->
 
                 
             </p>
@@ -597,7 +600,7 @@
             
             <p> 
                 <label for="startNoteNumber">Enter starting note (bottom left corner pad), with 0 as first note of scale:</label>
-                <input type="number" id="startNoteNumber" size = "5" value="6"> <!-- default value is 6 F# for LinnStrument -->
+                <input type="number" id="startNoteNumber" size = "5" value="6" min="0"> <!-- default value is 6 F# for LinnStrument -->
             </p>
          
             <p>
