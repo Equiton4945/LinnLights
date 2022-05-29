@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html>
+    
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>LinnStrument Lights</title>
+        <meta name="description" content="A generator of light patterns based on scales for LinnStrument.">
+        <meta name="author" content="Mark Gould">
+        <style>
+            canvas { border: 2px solid DarkSlateGray;}
+            body {background-color: whitesmoke; }
+        </style>
+        <script>
+            
+        function init() {
+            var lbutton = document.getElementById("initLColours");
+            if (!lbutton) {
+                alert("no l button")
+            }
+            else {
+                lbutton.onclick = addStepColours;
+            }
+            var sbutton = document.getElementById("initSColours");
+            if (!sbutton) {
+                alert("no s button");
+            }
+            else {
+                sbutton.onclick = addStepColours;
+            }
+            var lightsButton  = document.getElementById("showLights");
+            if (!lightsButton){
+                alert("No show lights button!");
+            }
+            else {
+                lightsButton.onclick = showLights;
+            }
+            
+            var linnSelect = document.getElementById("instrumentType");
+            linnSelect.onchange = clearLights;
+            
+            var showMidi = document.getElementById("showMidi");
+            showMidi.onclick = generateMidi;
+            
+            removeColourSelectionList("lColours");
+            removeColourSelectionList("sColours");
+            
+            // programmatically press these two buttons
+            addStepColoursForId("initLColours")
+            addStepColoursForId("initSColours")
+            
+            // now select the default dropdowns
+            selectOption("lColours_select1","G");
+            selectOption("lColours_select2","X");
+            selectOption("sColours_select1","G");
+        }
+            
+        // clears the lights down by removing session storage
+        function clearLights(){
+            // remove light items from session storage
+            sessionStorage.removeItem("lightString")
+            
+            var lights = [];
+            for (var i = 0; i<sessionStorage.length; i++){
+                if(sessionStorage.key(i).substring(0,6) == "Light_") {
+                    lights.push(sessionStorage.key(i));
+                }
+            }
+            
+            for (var i = 0; i < lights.length; i++){
+                sessionStorage.removeItem(lights[i])
+            }
+            
+            // clear the text box
+            document.getElementById("outputText").innerHTML = "";
+        }    
+            
+            
+        function addStepColours(e) {
+            var button = e.target.id;
+            addStepColoursForId(button);
+        }
+            
+        // This adds dropdowns under the l or s step size input text boxes
+        // so if 3 is in the textbox, 3 dropdowns are created
+        function addStepColoursForId(button) {
+            var textid = null;
+            var nodeToAddTo = null;
+            
+            if (button == "initLColours") {
+                textid = "lStepSize";
+                nodeToAddTo = "lColours";
+            }
+            
+            if (button == "initSColours") {
+                textid = "sStepSize";
+                nodeToAddTo = "sColours";
+            }
+             
+            var inputvalue = parseInt(document.getElementById(textid).value);
+
+            if(!inputvalue){
+                alert("No Value in " + textid ) ;     
+            }
+            else {
+            removeColourSelectionList(nodeToAddTo);    
+            var docNode = document.getElementById(nodeToAddTo);
+            // add a select item
+            var selectItem = null;
+            var optionItem = null;
+            var optionNumber = 1;
+            var spacer = "";
+            // add in the colours    
+            while (inputvalue > 0)
+                {
+                // add in an item to the select list
+                selectItem = document.createElement("label");
+                selectItem.setAttribute("for",nodeToAddTo + "_select" +optionNumber);
+                if(optionNumber > 1 ){
+                    spacer = "&nbsp;&nbsp;";
+                }else {
+                    spacer = "";
+                }
+                selectItem.innerHTML = spacer + "Colour " + optionNumber +": ";
+                docNode.appendChild(selectItem);
+                selectItem = document.createElement("select");
+                selectItem.setAttribute("id",nodeToAddTo + "_select"+optionNumber);
+                docNode.appendChild(selectItem);    
+                // add in the options
+                optionItem = document.createElement("option");
+                optionItem.setAttribute("value","R");
+                optionItem.innerHTML = "Red"
+                selectItem.appendChild(optionItem);
+                optionItem = document.createElement("option");
+                optionItem.setAttribute("value","Y");
+                optionItem.innerHTML = "Yellow"
+                selectItem.appendChild(optionItem);
+                optionItem = document.createElement("option");
+                optionItem.setAttribute("value","G");
+                optionItem.innerHTML = "Green"
+                selectItem.appendChild(optionItem);
+                optionItem = document.createElement("option");
+                optionItem.setAttribute("value","C");
+                optionItem.innerHTML = "Cyan"
+                selectItem.appendChild(optionItem);
+                optionItem = document.createElement("option");
+                optionItem.setAttribute("value","B");
+                optionItem.innerHTML = "Blue"
+                selectItem.appendChild(optionItem);
+                optionItem = document.createElement("option");
+                optionItem.setAttribute("value","M");
+                optionItem.innerHTML = "Magenta"
+                selectItem.appendChild(optionItem);
+                optionItem = document.createElement("option");
+                optionItem.setAttribute("value","X");
+                optionItem.innerHTML = "Off"
+                optionItem.setAttribute("selected","selected")
+                selectItem.appendChild(optionItem);
+                optionItem = document.createElement("option");
+                optionItem.setAttribute("value","W");
+                optionItem.innerHTML = "White"
+                selectItem.appendChild(optionItem);
+                optionItem = document.createElement("option");
+                optionItem.setAttribute("value","O");
+                optionItem.innerHTML = "Orange"
+                selectItem.appendChild(optionItem);
+                optionItem = document.createElement("option");
+                optionItem.setAttribute("value","L");
+                optionItem.innerHTML = "Lime"
+                selectItem.appendChild(optionItem);
+                optionItem = document.createElement("option");
+                optionItem.setAttribute("value","P");
+                optionItem.innerHTML = "Pink"
+                selectItem.appendChild(optionItem);
+                    
+                // set the default selections - all green unless 
+                inputvalue = inputvalue - 1;
+                optionNumber = optionNumber + 1;
+                }
+            }
+            
+        }
+            
+        // use this to manually select something in a drop down list
+        function selectOption(selectID,valueToSelect){
+            let element = document.getElementById(selectID);
+            element.value =valueToSelect;
+        }
+            
+        // this clears down the colour dropdowns when the user clicks on Setup L/s Colours
+        function removeColourSelectionList(nodename){
+            var item = document.getElementById(nodename);
+            while(item.firstChild) {
+                item.removeChild(item.lastChild);
+            }
+        }
+            
+        // this is called when the user clicks on "Show Light Pattern"
+        // it destroys the previous canvas each time it's run
+        function showLights(){
+            
+            // find out if we have a scale
+            var scaleString = document.getElementById("scaleString").value;
+            if(!scaleString){
+                alert("No Scale set!");
+            }
+            else {
+                // remove children of canvas container
+                var item = document.getElementById("canvasContainer");
+                while(item.firstChild) {
+                    item.removeChild(item.lastChild);
+                }
+                // add in a canvas that's easy to draw for the linnstrument selected
+                var linn = document.getElementById("instrumentType").value;
+                var canvasWidth = null;
+                var canvasHeight = null;
+                var numCols = null;
+                var numRows = null;
+                if (linn == 200 ){
+                    canvasWidth = 750;
+                    canvasHeight = 240;
+                    numCols = 25;
+                    numRows = 8;
+                }
+                if (linn == 128){
+                    canvasWidth = 480;
+                    canvasHeight = 240;
+                    numCols = 16;
+                    numRows = 8;
+                }
+                var canvasLights = document.createElement("canvas");
+                canvasLights.setAttribute("width",canvasWidth);
+                canvasLights.setAttribute("height",canvasHeight);
+                canvasLights.setAttribute("id","canvasLights");
+                item.appendChild(canvasLights);
+                makeLights();
+                drawLights(canvasLights,canvasWidth,canvasHeight, numCols,numRows);
+                // clear the text box
+                document.getElementById("outputText").innerHTML = "";
+            }
+        }
+            
+        // draws the lights on the canvas so user can see what the lights will look like
+       function drawLights(theCanvas,canvasWidth,canvasHeight, numCols, numRows){
+                // will draw rectangles according to the pattern eventually.
+           // obtain the canvas
+           var theContext = theCanvas.getContext("2d");
+           // draw a filled rectangle the correct size in mid grey
+           theContext.fillStyle = "LightGray"
+           theContext.fillRect(0,0,canvasWidth,canvasHeight);
+           // draw in the light squares note that drawing is 0 at the top so we 'reverse' this for consistency with the lights
+           for (row = 1 ; row <= numRows; row++){
+               for (col = 0; col < numCols; col++){
+                   theContext.lineWidth = 1; // 1px
+                   theContext.strokeRect(col * 30,(numRows-row) * 30,30,30);
+               }
+           }
+           // draw in the lights
+           for (row = 1 ; row <= numRows; row++){
+               for (col = 0; col < numCols; col++){
+                   theContext.beginPath();
+                   theContext.arc((col * 30)+15,((numRows-row)*30)+15,8,0, 2 * Math.PI, true);
+                   // note we need to correct the position to get the correct light value from session storage
+                   // this is because of the canvas drawing from top left when lights are defined from bottom left
+                   theContext.fillStyle = getDrawingColour(sessionStorage.getItem("Light_" + (row-1).toString() + "_"+ (col+1).toString() ) );
+                   theContext.fill(); // fill the light circle
+               }
+           }
+           
+       }
+            
+        // makes the scale string of light colours
+        // determines the lights for the selected LinnStrument for every cell
+        
+        // stores this in sessionstorage as Light_Row_Col,Colour value pair.
+        // NOTE: columns start at 1 with 1 at the left on LinnStrument and rows start at 0 with 0 at the bottom
+       function makeLights(){
+           // this will put the lights into the database based on the scale string, the offset and the instrument and the individual light settings
+           
+           // first thing to do is make a colour string of the whole scale 
+           // for each char in scale string
+           // if L do L Lights add to string
+           // if S do S lights add to string
+           var forcedBreak = null;
+           var lightString = "";
+           var scaleString = document.getElementById("scaleString").value;
+           var stepSize = null;
+           var docElementIDPrefix = null;
+           var lightColour = null;
+           for (var c = 0; c < scaleString.length; c++) {
+               if (scaleString[c]=="L"){
+                   stepSize = document.getElementById("lStepSize").value;
+                   docElementIDPrefix = "lColours_select";
+               }
+               if (scaleString[c]=="s"){
+                   stepSize = document.getElementById("sStepSize").value;
+                   docElementIDPrefix = "sColours_select";
+               }
+               for (light = 1; light <= stepSize; light++){
+                   lightColour = document.getElementById(docElementIDPrefix+light);
+                   if (!lightColour) {
+                       alert("Check you have set up L and s colours");
+                       forcedBreak = 1;
+                       break;
+                   } else {
+                        lightString = lightString + lightColour.value;
+                   }    
+               }
+               if (forcedBreak == 1){
+                   break;
+               }
+           }
+           if (forcedBreak == 1) {
+               // do nothing
+           } else {
+               
+               // process the first character to the value of the first note
+               if (document.getElementById("firstColour").value == "1") {
+                   // leave light string alone if use first colour is selected - i.e. use the colour we selected as colour 1
+               } else {
+                   lightString  = document.getElementById("firstColour").value + lightString.substring(1);
+               }
+               sessionStorage.setItem("lightString",lightString);
+              
+           
+              // now let's create the lights array
+               var linn = document.getElementById("instrumentType").value;
+               var rows = 8;
+               var cols = linn / 8; // get the right number of cols and rows
+               // first row is offset zero, and all the others work from there
+               var offset = document.getElementById("verticalOffset").value;
+               var scalePosition = 0;
+               var userScaleStartPosition = parseInt(document.getElementById("startNoteNumber").value); // first row is always zero offset
+               var localOffset = 0;
+               if (offset == 99){
+                  offset = cols; // use the value from the cols dependent on instrument
+                }
+               for (row=0 ; row < rows; row++){
+
+                   if (row > 0) {
+                       // compute the scale offset based on the offset parameter.
+                       // if the offset is 99 - no overlap, this merely treats it as if the offset is one beyond the end of the keyboard
+                       // if the offset is -ve we need to create a +ve version
+
+
+                       localOffset = offset * row;
+                        if (localOffset < 0){
+                            scalePosition = lightString.length - ((localOffset + userScaleStartPosition) % lightString.length);
+                        } else {
+                            scalePosition = ((localOffset + userScaleStartPosition) % lightString.length);
+                        }
+                   } else {
+                       scalePosition = userScaleStartPosition;
+                   }
+                   for (col = 1; col <= cols ; col++){
+                      // find out which item needs to go in from light string
+                      sessionStorage.setItem("Light_" + row + "_" + col,lightString[(scalePosition + col - 1) % lightString.length]) 
+                   }
+               }
+           }
+       }
+       
+       // This function is used for testing the value of the string put in session storage
+       function showScaleLights(lightString){
+            alert(lightString);
+       }
+            
+        // Generates the Midi commands and puts them into the text box
+        // puts in a tiny delay to throttle the MIDI sends
+       function generateMidi(){
+           // only do this if the lightString is present in the Session Storage
+           var lightString = sessionStorage.getItem("lightString")
+           if (!lightString){
+               alert("No Lights set!");
+           } else {
+                var linn = document.getElementById("instrumentType").value;
+                var rows = 8;
+                var cols = linn / 8; // get the right number of cols and rows
+                var colourChar = ""
+                document.getElementById("outputText").innerHTML = "dev \"LinnStrument MIDI\"" 
+               for (row=0 ; row < rows; row++){
+                   for (col = 1; col <= cols ; col++){
+                       // obtain the light value
+                       colourChar = sessionStorage.getItem("Light_"+row+"_"+col);
+                       document.getElementById("outputText").innerHTML = document.getElementById("outputText").innerHTML + "\r\n" + "CC 20 " + col;
+                       document.getElementById("outputText").innerHTML = document.getElementById("outputText").innerHTML + "\r\n" + "CC 21 " + row;
+                       document.getElementById("outputText").innerHTML = document.getElementById("outputText").innerHTML + "\r\n" + "CC 22 " + getMidiColour(colourChar);
+                       document.getElementById("outputText").innerHTML = document.getElementById("outputText").innerHTML + "\r\n" + "+00.010"  //delay by 15milliseconds 
+                   }
+                   
+               }
+               // put in the memory rows
+               document.getElementById("outputText").innerHTML = document.getElementById("outputText").innerHTML + "\r\n" + "CC 23 " + document.getElementById("memoryLocation").value
+           }
+       }     
+       
+            // converts single letter colour codes into midi numbers for sendmidi
+        function getMidiColour(colourLetter){
+            var output = ""
+            if (colourLetter == "R"){
+                output = 1
+            }else if (colourLetter == "Y"){
+                output = 2
+            }else if (colourLetter == "G"){
+                output = 3
+            }else if (colourLetter == "C"){
+                output = 4
+            }else if (colourLetter == "B"){
+                output = 5
+            }else if (colourLetter == "M"){
+                output = 6
+            }else if (colourLetter == "X"){
+                output = 7
+            }else if (colourLetter == "W"){
+                output = 8
+            }else if (colourLetter == "O"){
+                output = 9
+            }else if (colourLetter == "L"){
+                output = 10
+            }else if (colourLetter == "P"){
+                output = 11
+            }
+
+            return output;
+        }
+            
+            
+            // converts single letter colour codes into web colours for display 
+            function getDrawingColour(colourLetter){
+            var output = ""
+            if (colourLetter == "R"){
+                output = "Red"
+            }else if (colourLetter == "Y"){
+                output = "Yellow"
+            }else if (colourLetter == "G"){
+                output = "LawnGreen"
+            }else if (colourLetter == "C"){
+                output = "Cyan"
+            }else if (colourLetter == "B"){
+                output = "Blue"
+            }else if (colourLetter == "M"){
+                output = "Magenta"
+            }else if (colourLetter == "X"){
+                output = "LightGrey"
+            }else if (colourLetter == "W"){
+                output = "White"
+            }else if (colourLetter == "O"){
+                output = "Orange"
+            }else if (colourLetter == "L"){
+                output = "Lime"
+            }else if (colourLetter == "P"){
+                output = "Pink"
+            }
+
+            return output;
+        }
+            
+            
+         window.onload = init;
+        </script>
+    </head>
+    <body>
+        <h1>LinnStrument Pad Light Programmer</h1>
+           <div id="helpText" style="width: 600px; text-align: justify;">
+                <p style="font-style: italic;">
+                    All scales must have at least one s step and one L step, but these can be in any order. The numbers for the step size indicates how many pads (from left to right) cover the L and s steps. For the diatonic scale in 12 tones, L is 2 semitones and s is 1 semitone. Remember, this tool does not retune your LinnStrument, it only is for creating light patterns that correspond to your scale choice. The default values are set to replicate the standard default lights on a LinnStrument with F# in the bottom left corner pad.
+                </p>
+             </div>
+        <h2>Input Parameters</h2>
+        <h3>Set up the scale here</h3>
+        <p></p>
+        <div id="inputDiv" style="padding-left: 50px;">
+        <form>
+            <p>
+            <label for="instrumentType">Select your LinnStrument:</label>
+            <select id="instrumentType">
+                <option value="200" selected="selected">LinnStrument 200</option>
+                <option value="128">LinnStrument 128</option>
+            </select>
+            </p>
+            <p>
+            <label for="memoryLocation">Select which memory to store pattern in:</label>
+            <select id="memoryLocation">
+                <option value="0" >A</option>
+                <option value="1">A#</option>
+                <option value="2" selected="selected">B</option>
+            </select>
+            </p>
+            <p>
+            <label for="verticalOffset">Select row offset:</label>
+            <select id="verticalOffset">
+                <option value="-16">-16</option>
+                <option value="-15">-15</option>
+                <option value="-14">-14</option>
+                <option value="-13">-13</option>
+                <option value="-12">-12</option>
+                <option value="-11">-11</option>
+                <option value="-10">-10</option>
+                <option value="-9">-9</option>
+                <option value="-8">-8</option>
+                <option value="-7">-7</option>
+                <option value="-6">-6</option>
+                <option value="-5">-5</option>
+                <option value="-4">-4</option>
+                <option value="-3">-3</option>
+                <option value="-2">-2</option>
+                <option value="-1">-1</option>
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+                <option value="5" selected="selected">5 (default 4ths setting)</option> <!-- this is the default LinnStrument setting -->
+                <option value="6">6</option>
+                <option value="7">7</option>
+                <option value="8">8</option>
+                <option value="9">9</option>
+                <option value="10">10</option>
+                <option value="11">11</option>
+                <option value="12">12</option>
+                <option value="13">13</option>
+                <option value="14">14</option>
+                <option value="15">15</option>
+                <option value="16">16</option>
+                <option value="99">No Overlap</option>
+            </select>
+            </p>
+        
+            <p>
+                <label for="lStepSize">Choose L step size:</label>
+                <input type="text" id="lStepSize" size="5" value="2">
+                <input type="button" id="initLColours" value="Setup L Colours">
+                <label for="firstColour">&nbsp;&nbsp;Choose colour of first scale note:</label>
+                <select id="firstColour">
+                    <option value = "1" >Use first colour of first scale step</option>
+                    <option value = "R">Red</option>
+                    <option value = "Y">Yellow</option>
+                    <option value = "G">Green</option>
+                    <option value = "C" selected="selected">Cyan</option>
+                    <option value = "B">Blue</option>
+                    <option value = "M">Magenta</option>
+                    <option value = "X">Off</option>
+                    <option value = "W">White</option>
+                    <option value = "O">Orange</option>
+                    <option value = "L">Lime</option>
+                    <option value = "P">Pink</option>
+                  </select>
+            </p>
+            <!-- container for L Step colour inputs -->
+            <div id="lColours"></div>
+            <p>
+                <label for="sStepSize">Choose s step size:</label>
+                <input type="text" id="sStepSize" size="5" value="1">
+                <input type="button" id="initSColours" value="Setup s Colours"> 
+
+                
+            </p>
+            <!-- container for s Step colour inputs -->
+            <div id="sColours"></div>
+            <p>
+                <label for="scaleString">Enter Scale String (e.g. LsLLs or sLsssL etc.):</label>
+                <input type="text" id="scaleString" size="20" value="LLsLLLs">
+            </p>
+            <p> 
+                <label for="startNoteNumber">Enter starting note (bottom left corner pad), with 0 as first note of scale:</label>
+                <input type="text" id="startNoteNumber" size = "5" value="6"> <!-- default value is 6 F# for LinnStrument -->
+            </p>
+         
+            <p>
+            <input type="button" id="showLights" value="Show Light Pattern"> <!-- add handler to draw lights table and populate the array for output -->
+            <input type="button" id="showMidi" value="Show Sendmidi Commands">
+            </p>
+        </form>
+            </div> <!-- inputDiv -->
+        <h2>Light Pattern</h2>
+        <h3>This is what the above scale lighst will look like on your LinnStrument</h3>
+        <div id="canvasContainer" style="padding-left: 50px;"></div>
+        <h2>Sendmidi</h2>
+        <h3>Copy the contents of the box below to a text file for Geert Bevin's <i>sendmidi</i> script.</h3>
+        <form id="outputSendmidi">
+        <textarea id="outputText" style="width: 600px; height: 400px; margin-left: 50px;"></textarea>
+        </form>
+        
+        
+    </body>
+    
+</html>
