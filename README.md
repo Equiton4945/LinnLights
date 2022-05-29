@@ -47,6 +47,12 @@ Data is stored in SessionStorage, with prefixed names, hopefully to avoid trampl
 It is expected that this tool is used in conjunction with Geert Bevin's sendmidi. If you have another tool which sends midi CCs in a different format it should be easy to adapt the generateMidi() function. 
   
 The current generateMidi() function inserts 'relative timestamps' in between CC commands to ensure that sendmidi sends the commands slow enough for the LinnStrument to respond. The current setting is 10ms, so a 200-pad light setting takes 2sec to load. Removing them leads to patterns not loading correctly.
+ 
+TO DO
+=====
+  
+Put in full form validation op input fields. Some are validated but not all.
+Lots of code tidying.
   
 
 Changes and upgrades
