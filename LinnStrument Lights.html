@@ -300,15 +300,34 @@
            var stepSize = null;
            var docElementIDPrefix = null;
            var lightColour = null;
+           
+           // first we check that we have a valid scale string
+           var valid = true;
+           
            for (var c = 0; c < scaleString.length; c++) {
-               if (scaleString[c]=="L"){
+               if (scaleString[c]=="L" || scaleString[c] == "l" || scaleString[c]=="s" || scaleString[c] == "S")
+                   {
+                       // still valid
+                   } else {
+                       valid = false;
+                   }
+           }
+           if (!valid){
+               alert("Scale string contains characters other than S s L l")
+           } 
+           else {
+           for (var c = 0; c < scaleString.length; c++) {
+               if (scaleString[c]=="L" || scaleString[c] == "l" ){
                    stepSize = document.getElementById("lStepSize").value;
-                   docElementIDPrefix = "lColours_select";
-               }
-               if (scaleString[c]=="s"){
+                   docElementIDPrefix = "lColours_select";           
+               } else if (scaleString[c]=="s" || scaleString[c] == "S"){
                    stepSize = document.getElementById("sStepSize").value;
                    docElementIDPrefix = "sColours_select";
+               } else {
+                   alert("Your scale contains characters other than s/S or l/L");
+                  
                }
+               if (valid) {
                for (light = 1; light <= stepSize; light++){
                    lightColour = document.getElementById(docElementIDPrefix+light);
                    if (!lightColour) {
@@ -372,6 +391,8 @@
                }
            }
        }
+           }
+           }
        
        // This function is used for testing the value of the string put in session storage
        function showScaleLights(lightString){
@@ -538,10 +559,13 @@
                 <option value="99">No Overlap</option>
             </select>
             </p>
-        
+        <p>
+                <label for="scaleString">Enter Scale String (e.g. LsLLs or sLsssL etc.):</label>
+                <input type="text" id="scaleString" size="20" value="LLsLLLs">
+            </p>
             <p>
                 <label for="lStepSize">Choose L step size:</label>
-                <input type="text" id="lStepSize" size="5" value="2">
+                <input type="number" id="lStepSize" size="5" value="2">
                 <input type="button" id="initLColours" value="Setup L Colours">
                 <label for="firstColour">&nbsp;&nbsp;Choose colour of first scale note:</label>
                 <select id="firstColour">
@@ -563,20 +587,17 @@
             <div id="lColours"></div>
             <p>
                 <label for="sStepSize">Choose s step size:</label>
-                <input type="text" id="sStepSize" size="5" value="1">
+                <input type="number" id="sStepSize" size="5" value="1">
                 <input type="button" id="initSColours" value="Setup s Colours"> 
 
                 
             </p>
             <!-- container for s Step colour inputs -->
             <div id="sColours"></div>
-            <p>
-                <label for="scaleString">Enter Scale String (e.g. LsLLs or sLsssL etc.):</label>
-                <input type="text" id="scaleString" size="20" value="LLsLLLs">
-            </p>
+            
             <p> 
                 <label for="startNoteNumber">Enter starting note (bottom left corner pad), with 0 as first note of scale:</label>
-                <input type="text" id="startNoteNumber" size = "5" value="6"> <!-- default value is 6 F# for LinnStrument -->
+                <input type="number" id="startNoteNumber" size = "5" value="6"> <!-- default value is 6 F# for LinnStrument -->
             </p>
          
             <p>
