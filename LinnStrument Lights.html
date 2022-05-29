@@ -12,8 +12,10 @@
             body {background-color: whitesmoke; }
         </style>
         <script>
-            
+        
+        // runs when window opens.
         function init() {
+            // obtain the button for 'setup L colours' and add the callback
             var lbutton = document.getElementById("initLColours");
             if (!lbutton) {
                 alert("no l button")
@@ -21,6 +23,8 @@
             else {
                 lbutton.onclick = addStepColours;
             }
+            
+            // obtain the button for 'setup s colours' and add the callback
             var sbutton = document.getElementById("initSColours");
             if (!sbutton) {
                 alert("no s button");
@@ -28,6 +32,8 @@
             else {
                 sbutton.onclick = addStepColours;
             }
+            
+           // obtain the button to show the light pattern and add the callback
             var lightsButton  = document.getElementById("showLights");
             if (!lightsButton){
                 alert("No show lights button!");
@@ -36,20 +42,23 @@
                 lightsButton.onclick = showLights;
             }
             
+            // get the dropdown instrument chooser and add callback
             var linnSelect = document.getElementById("instrumentType");
             linnSelect.onchange = clearLights;
             
+            // get the button for generating the midi and add callback
             var showMidi = document.getElementById("showMidi");
             showMidi.onclick = generateMidi;
             
+            // manually remove any colour dropdowns (there shouldn't be any but - just in case!)
             removeColourSelectionList("lColours");
             removeColourSelectionList("sColours");
             
-            // programmatically press these two buttons
+            // programmatically press these two buttons (this creates the default colour set drop downs)
             addStepColoursForId("initLColours")
             addStepColoursForId("initSColours")
             
-            // now select the default dropdowns
+            // now select the default dropdowns for the default pattern
             selectOption("lColours_select1","G");
             selectOption("lColours_select2","X");
             selectOption("sColours_select1","G");
@@ -75,7 +84,8 @@
             document.getElementById("outputText").innerHTML = "";
         }    
             
-            
+        
+        // this callback adds the dropdowns for the relevant step. The target identifies which button was pressed.
         function addStepColours(e) {
             var button = e.target.id;
             addStepColoursForId(button);
@@ -97,6 +107,7 @@
                 nodeToAddTo = "sColours";
             }
              
+            // extract the value of the input box as an integer (@TODO add validation to the input box)
             var inputvalue = parseInt(document.getElementById(textid).value);
 
             if(!inputvalue){
@@ -122,11 +133,12 @@
                     spacer = "";
                 }
                 selectItem.innerHTML = spacer + "Colour " + optionNumber +": ";
+                // add the dropdown to the container
                 docNode.appendChild(selectItem);
                 selectItem = document.createElement("select");
                 selectItem.setAttribute("id",nodeToAddTo + "_select"+optionNumber);
                 docNode.appendChild(selectItem);    
-                // add in the options
+                // add in the options to the dropdown
                 optionItem = document.createElement("option");
                 optionItem.setAttribute("value","R");
                 optionItem.innerHTML = "Red"
@@ -173,8 +185,9 @@
                 optionItem.innerHTML = "Pink"
                 selectItem.appendChild(optionItem);
                     
-                // set the default selections - all green unless 
+                // decrement the counter of number of drop downs
                 inputvalue = inputvalue - 1;
+                // increment the option number 
                 optionNumber = optionNumber + 1;
                 }
             }
